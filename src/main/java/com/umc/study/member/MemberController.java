@@ -23,4 +23,11 @@ public class MemberController {
     public ApiResponse<MemberInfoResponse> getMyInfo(@RequestAttribute(AuthInterceptor.MEMBER_ID) long memberId) {
         return new ApiResponse<>(true, "COMMON200", "내 정보를 조회했습니다.", service.getMyInfo(memberId));
     }
+
+    @PatchMapping("/me")
+    public ApiResponse<MemberInfoResponse> updateMyInfo(
+            @RequestAttribute(AuthInterceptor.MEMBER_ID) long memberId,
+            @Valid @RequestBody MemberUpdateRequest request) {
+        return new ApiResponse<>(true, "COMMON200", "회원 정보를 수정했습니다.", service.updateMyInfo(memberId, request));
+    }
 }

@@ -42,4 +42,8 @@ public class MemberRepository {
                 rs.getObject("created_at", java.time.LocalDateTime.class)), memberId
         ).stream().findFirst();
     }
+
+    void updateNickname(long memberId, String nickname) {
+        jdbc.update("UPDATE member SET nickname = ? WHERE member_id = ?", nickname, memberId);
+    }
 }
