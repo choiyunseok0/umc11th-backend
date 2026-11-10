@@ -1,5 +1,6 @@
 package com.umc.study.member;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -23,4 +24,14 @@ public class MemberRepository {
         }, key);
         return java.util.Objects.requireNonNull(key.getKey()).longValue();
     }
+
+    public Optional<LoginCredentials> findCredentialsByEmail(String email) {
+        return jdbc.query(
+            "SELECT member_id, email, nickname, password_hash FROM member WHERE email = ?",
+            (rs, row) -> new LoginCredentials(rs.getLong("member_id"), rs.getString("email"),
+                rs.getString("nickname"), rs.getString("password_hash")), email
+        ).stream().findFirst();
+    }
+
+    public record LoginCredentials(long memberId, String email, String nickname, String passwordHash) {}
 }
