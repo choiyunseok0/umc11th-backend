@@ -34,4 +34,12 @@ public class MemberRepository {
     }
 
     public record LoginCredentials(long memberId, String email, String nickname, String passwordHash) {}
+
+    public Optional<MemberInfoResponse> findInfoById(long memberId) {
+        return jdbc.query(
+            "SELECT email, nickname, created_at FROM member WHERE member_id = ?",
+            (rs, row) -> new MemberInfoResponse(rs.getString("email"), rs.getString("nickname"),
+                rs.getObject("created_at", java.time.LocalDateTime.class)), memberId
+        ).stream().findFirst();
+    }
 }

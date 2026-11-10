@@ -1,6 +1,10 @@
 package com.umc.study.auth;
 
+import com.umc.study.common.ApiException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import org.springframework.http.HttpStatus;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -32,5 +36,20 @@ public class JwtUtil {
             .expiration(Date.from(now.plusSeconds(expirationSeconds)))
             .signWith(key)
             .compact();
+    }
+
+    public long getMemberId(String token) {
+        try {
+            String subject = Jwts.parser().verifyWith(key).build()
+                .parseSignedClaims(token).getPayload().getSubject();
+            long memberId = Long.parseLong(subject);
+            if (memberId <= 0) throw new IllegalArgumentException("Invalid member ID");
+            return memberId;
+        } catch (ExpiredJwtException error) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "AUTH401_4",
+                "토큰이 만료되었습니다. 다시 로그인해주세요.");
+        } catch (JwtException | IllegalArgumentException error) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "AUTH401_3", "유효하지 않은 토큰입니다.");
+        }
     }
 }
