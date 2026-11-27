@@ -1,10 +1,10 @@
 package com.umc.study.rating;
 
+import com.umc.study.common.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +13,7 @@ public class RatingService {
 
     public RatingResponse create(long memberId, CreateRatingRequest request) {
         if (!repository.memberExists(memberId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다.");
+            throw new ApiException(HttpStatus.NOT_FOUND, "MEMBER404_1", "존재하지 않는 회원입니다.");
         }
         long ratingId = repository.insert(memberId, request);
         return new RatingResponse(ratingId, memberId, request.movieId(), request.score(), request.comment());
@@ -34,9 +34,9 @@ public class RatingService {
 
     private RatingResponse requireOwner(long memberId, long ratingId) {
         var rating = repository.lockById(ratingId).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 평점입니다."));
+            new ApiException(HttpStatus.NOT_FOUND, "RATING404_1", "존재하지 않는 평점입니다."));
         if (rating.memberId() != memberId) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인이 작성한 평점만 수정하거나 삭제할 수 있습니다.");
+            throw new ApiException(HttpStatus.FORBIDDEN, "RATING403_1", "본인이 작성한 평점만 수정하거나 삭제할 수 있습니다.");
         }
         return rating;
     }
